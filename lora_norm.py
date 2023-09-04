@@ -47,6 +47,16 @@ def resize(image_pil, width, height):
     return background
 
 
+def transparent_to_white(image_pil):
+    '''
+    Replace transparent background with white background.
+    '''
+    new_image = Image.new("RGBA", image_pil.size, "WHITE")
+    new_image.paste(image_pil, (0, 0), image_pil)
+    new_image = new_image.convert('RGB')
+    return new_image
+
+
 if __name__ == "__main__":
     args = parse_args()
     for path_in in tqdm(Path(args["img_folder"]).glob('*.png'), total=len(os.listdir(args["img_folder"]))):
@@ -55,6 +65,8 @@ if __name__ == "__main__":
         if path_out.exists():
             continue
         with Image.open(path_in) as img:
+            if args["bkg_to_white"]:
+                img = transparent_to_white(img)
             out = resize(img, width=int(args["size"]), height=int(args["size"]))
             if args["overwrite"]:
                 out.save(path_in)
